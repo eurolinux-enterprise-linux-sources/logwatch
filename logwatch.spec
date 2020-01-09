@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.3.6
-Release: 48.1%{?dist}
+Release: 49%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -54,6 +54,7 @@ Patch54: logwatch-7.3.6-exim2.patch
 Patch55: logwatch-7.3.6-removeservice.patch
 Patch56: logwatch-7.3.6-cron_conf.patch
 Patch57: logwatch-7.3.6-named5.patch
+Patch58: logwatch-7.3.6-sanitize-log-filenames.patch
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -115,6 +116,7 @@ of the package on many systems.
 %patch55 -p1
 %patch56 -p1
 %patch57 -p1
+%patch58 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -238,6 +240,11 @@ rm -rf %{buildroot}
 %doc License project/CHANGES 
 
 %changelog
+* Mon Feb 28 2011 Karel Klic <kklic@redhat.com> - 7.3.6-49
+- Added fix for CVE-2011-1018: Privilege escalation due improper
+  sanitization of special characters in log file names
+  Resolves: #680304
+
 * Mon Nov 30 2009 Dennis Gregorovic <dgregor@redhat.com> - 7.3.6-48.1
 - Rebuilt for RHEL 6
 
