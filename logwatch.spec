@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.3.6
-Release: 52%{?dist}
+Release: 54%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -68,6 +68,9 @@ Patch68: logwatch-7.3.6-su-l.patch
 Patch69: logwatch-7.3.6-applystddate.patch
 Patch70: logwatch-7.3.6-kerberos-logins.patch
 Patch71: logwatch-7.3.6-xvc.patch
+Patch72: logwatch-7.3.6-zz-disk_space3.patch
+Patch73: logwatch-7.3.6-blank-files.patch
+Patch74: logwatch-7.3.6-logdir-case.patch
 
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
@@ -144,6 +147,9 @@ of the package on many systems.
 %patch69 -p1
 %patch70 -p1
 %patch71 -p1
+%patch72 -p1
+%patch73 -p1
+%patch74 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -261,12 +267,20 @@ rm -rf %{buildroot}
 %{_datadir}/logwatch/default.conf/services/*.conf
 %{_datadir}/logwatch/default.conf/logfiles/*.conf
 %{_datadir}/logwatch/default.conf/html/*.html  
-%{_sysconfdir}/cron.daily/0logwatch
+%config(noreplace) %{_sysconfdir}/cron.daily/0logwatch
 %doc %{_mandir}/man8/logwatch.8*
 
 %doc License project/CHANGES 
 
 %changelog
+* Mon Jan  4 2016 Jan Synáček <jsynacek@redhat.com> - 7.3.6-54
+- Fix: Should not change the case of $logdir (#1293621)
+
+* Wed Nov 18 2015 Jan Synáček <jsynacek@redhat.com> - 7.3.6-53
+- Fix: When filesystem name is long, the disk full check fails to work (#1196774)
+- Fix: Logwatch cron files not marked correctly as %config(noreplace) (#1221963)
+- Fix: logwatch fails with argument list too long (#921409)
+
 * Thu Jun 13 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-52
 - Fix: logwatch shows unknown entries for su - (#974042)
 - Fix: logwatch must understand RSYSLOG_FileFormat timestamps (#974044)
