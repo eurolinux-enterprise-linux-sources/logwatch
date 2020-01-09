@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.3.6
-Release: 49%{?dist}
+Release: 52%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -55,6 +55,20 @@ Patch55: logwatch-7.3.6-removeservice.patch
 Patch56: logwatch-7.3.6-cron_conf.patch
 Patch57: logwatch-7.3.6-named5.patch
 Patch58: logwatch-7.3.6-sanitize-log-filenames.patch
+Patch59: logwatch-7.3.6-dovecot-new.patch
+Patch60: logwatch-7.3.6-http.patch
+Patch61: logwatch-7.3.6-mailto.patch
+Patch62: logwatch-7.3.6-named-dnssec.patch
+Patch63: logwatch-7.3.6-pluto.patch
+Patch64: logwatch-7.3.6-postfix-pipelining.patch
+Patch65: logwatch-7.3.6-secure-username.patch
+Patch66: logwatch-7.3.6-up2date.patch
+Patch67: logwatch-7.3.6-smartd2.patch
+Patch68: logwatch-7.3.6-su-l.patch
+Patch69: logwatch-7.3.6-applystddate.patch
+Patch70: logwatch-7.3.6-kerberos-logins.patch
+Patch71: logwatch-7.3.6-xvc.patch
+
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -117,6 +131,19 @@ of the package on many systems.
 %patch56 -p1
 %patch57 -p1
 %patch58 -p1
+%patch59 -p1
+%patch60 -p1
+%patch61 -p1
+%patch62 -p1
+%patch63 -p1
+%patch64 -p1
+%patch65 -p1
+%patch66 -p1
+%patch67 -p1
+%patch68 -p1
+%patch69 -p1
+%patch70 -p1
+%patch71 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -240,6 +267,25 @@ rm -rf %{buildroot}
 %doc License project/CHANGES 
 
 %changelog
+* Thu Jun 13 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-52
+- Fix: logwatch shows unknown entries for su - (#974042)
+- Fix: logwatch must understand RSYSLOG_FileFormat timestamps (#974044)
+- Fix: Logwatch does not recognise ssh Kerberos (GSS) logins. (#974046)
+- Fix: Logins through xen virt console are under unmatched entries (#974047)
+
+* Thu Jun  6 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-51
+- Fix: Ignore the ignorable openswan messages (#799690)
+- Fix: Logwatch does not handle "improper command pipelining after (NOOP|RSET)" (#894185)
+- Fix: Logwatch doesn't proper ignore "password check failed for user" (#894191)
+- Fix: logwatch/up2date fix and extension (#737247)
+- Fix: logwatch a bit chatty with smartd (#888007)
+
+* Wed Jun  5 2013 Jan Synáček <jsynacek@redhat.com> - 7.3.6-50
+- Fix: Logwatch doesn't parse Dovecot 2.x log messages proper (#799987)
+- Fix: logwatch "http" script should treat APT .hdr files as "archives" (#800843)
+- Fix: logwatch does not create log file when 'MailTo' in config file has no value (#837034)
+- Fix: Zillions of "SOA: no valid signature found" in logwatch mails (#894134)
+
 * Mon Feb 28 2011 Karel Klic <kklic@redhat.com> - 7.3.6-49
 - Added fix for CVE-2011-1018: Privilege escalation due improper
   sanitization of special characters in log file names
