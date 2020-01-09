@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.3.6
-Release: 54%{?dist}
+Release: 55%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -71,8 +71,10 @@ Patch71: logwatch-7.3.6-xvc.patch
 Patch72: logwatch-7.3.6-zz-disk_space3.patch
 Patch73: logwatch-7.3.6-blank-files.patch
 Patch74: logwatch-7.3.6-logdir-case.patch
+Patch75: logwatch-7.3.6-kerberos-detail.patch
+Patch76: logwatch-7.3.6-argument-list.patch
 
-Requires: textutils sh-utils grep mailx
+Requires: textutils sh-utils grep mailx findutils
 Requires: perl(Date::Manip)
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArchitectures: noarch
@@ -150,6 +152,8 @@ of the package on many systems.
 %patch72 -p1
 %patch73 -p1
 %patch74 -p1
+%patch75 -p1
+%patch76 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -273,6 +277,10 @@ rm -rf %{buildroot}
 %doc License project/CHANGES 
 
 %changelog
+* Tue Sep 13 2016 Jan Synáček <jsynacek@redhat.com> - 7.3.6-55
+- Fix: logwatch --service sshd --detail 8 does not print Kerberos summary (#1295886)
+- Fix: logwatch fails with Argument list too long (#1329676)
+
 * Mon Jan  4 2016 Jan Synáček <jsynacek@redhat.com> - 7.3.6-54
 - Fix: Should not change the case of $logdir (#1293621)
 
