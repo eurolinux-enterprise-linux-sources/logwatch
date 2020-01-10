@@ -1,0 +1,12 @@
+diff -rup logwatch-svn140/scripts/services/sshd logwatch-svn140-new/scripts/services/sshd
+--- logwatch-svn140/scripts/services/sshd	2016-05-19 14:30:15.950891232 +0200
++++ logwatch-svn140-new/scripts/services/sshd	2016-05-19 14:30:51.436881734 +0200
+@@ -800,7 +800,7 @@ if (keys %ChownErr) {
+ }
+ 
+ if ( ($Detail == 7 && keys %Krb_relm > 1) || ($Detail >= 8 && keys %Krb_relm) ){
+-  print "\nSucessfull Kerberos Authentication from ",(scalar keys %Krb_relm)," relm:\n";
++  print "\nSuccessful Kerberos Authentication from ",(scalar keys %Krb_relm)," realm:\n";
+   foreach my $relm (keys %Krb_relm) { 
+     if($Detail > 9){
+       print "   ",$relm,":\n";

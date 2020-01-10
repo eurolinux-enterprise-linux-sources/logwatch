@@ -1,0 +1,11 @@
+--- logwatch-svn140/scripts/logwatch.pl	2016-04-22 13:17:14.275096840 +0200
++++ logwatch-svn140/scripts/logwatch.pl.new	2016-04-22 13:24:16.060709792 +0200
+@@ -952,7 +952,7 @@ sub getInt {
+ ######################################################################
+ sub CleanVars {
+    foreach (keys %Config) {
+-      unless (defined $Config{$_} and $_ eq "hostname") {
++      unless (defined $Config{$_} and ($_ eq "hostname" or $_ eq "logdir")) {
+          $Config{$_} = getInt($Config{$_});
+       }
+    }

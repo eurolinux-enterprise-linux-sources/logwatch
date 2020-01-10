@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.4.0
-Release: 28.20130522svn140%{?dist}
+Release: 32.20130522svn140%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -25,6 +25,14 @@ Patch9: logwatch-rkhunter.patch
 Patch16: logwatch-secure-userhelper.patch
 Patch18: logwatch-secure-username.patch
 Patch19: logwatch-man.patch
+Patch20: logwatch-man-disrupted-sentence.patch
+Patch21: logwatch-smartd-copyright.patch
+Patch22: logwatch-disk-space.patch
+Patch23: logwatch-logdir-case.patch
+Patch24: logwatch-sshd-detail.patch
+Patch25: logwatch-puppet.patch
+Patch26: logwatch-blank-files.patch
+Patch27: logwatch-sshd-typos.patch
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
 Requires: perl(Sys::CPU)
@@ -48,6 +56,14 @@ of the package on many systems.
 %patch16 -p1
 %patch18 -p1
 %patch19 -p1
+%patch20 -p1
+%patch21 -p1
+%patch22 -p1
+%patch23 -p1
+%patch24 -p1
+%patch25 -p1
+%patch26 -p1
+%patch27 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -122,7 +138,7 @@ echo "# Configuration overrides for specific logfiles/services may be placed her
 %dir %{_sysconfdir}/logwatch/conf/logfiles
 %dir %{_sysconfdir}/logwatch/conf/services
 %dir %{_sysconfdir}/logwatch/scripts/services
-%{_sysconfdir}/cron.daily/0logwatch
+%config(noreplace) %{_sysconfdir}/cron.daily/0logwatch
 %config(noreplace) %{_sysconfdir}/logwatch/conf/*.conf
 %dir %{_datadir}/logwatch
 %dir %{_datadir}/logwatch/dist.conf
@@ -147,6 +163,29 @@ echo "# Configuration overrides for specific logfiles/services may be placed her
 %{_mandir}/man*/*
 
 %changelog
+* Thu May 19 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-32.20130522svn140
+- Refix logwatch fails with argument list too long (#1300170)
+- Fix Typos in sshd service script output (#1335493)
+
+* Fri May 13 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-32.20130522svn140
+- Refix When filesystem name is long, the disk full check fails to work (#1293360)
+
+* Thu May 12 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-31.20130522svn140
+- remove incorrect changelog entry (Related: #1221903)
+
+* Thu May 12 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-30.20130522svn140
+- Fix smartd copyright message needs to be suppressed again (#1162741)
+
+* Fri Apr 22 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-29.20130522svn140
+- Fix disrupted sentence in default logwatch.conf file (#1126848)
+- Fix smartd copyright message needs to be suppressed again (#1162741)
+- Fix Logwatch cron files not marked correctly as %%config(noreplace) (#1221903)
+- Fix When filesystem name is long, the disk full check fails to work (#1293360)
+- Fix Should not change the case of $logdir (#1293624)
+- Fix logwatch --service sshd --detail 8 does not print Kerberos summary (#1295888)
+- Fix logwatch puppet-agent unknown entries (#1299181)
+- Fix logwatch fails with argument list too long (#1300170)
+
 * Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 7.4.0-28.20130522svn140
 - Mass rebuild 2013-12-27
 

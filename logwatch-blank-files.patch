@@ -1,0 +1,10 @@
+--- logwatch-svn140/scripts/logwatch.pl	2016-04-22 13:36:55.290535535 +0200
++++ logwatch-svn140-new/scripts/logwatch.pl	2016-04-22 13:40:44.117657038 +0200
+@@ -794,6 +794,7 @@ foreach $LogFile (@LogFileList) {
+          print "\n";
+          next;
+       }
++      next if (-z $ThisFile);
+       #FIXME - We have a bug report for filenames with spaces, can be caught here needs test -mgt
+       $FileText .= ("'" . $ThisFile . "' ");
+    } #End foreach ThisFile
