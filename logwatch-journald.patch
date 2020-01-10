@@ -1,0 +1,168 @@
+3 upstreamed patches.
+
+Resolves: #1504984
+
+From 63c05d4ea2f90fd54770d2487e9d18ee8c77823d Mon Sep 17 00:00:00 2001
+From: bjorn <bjorn1@users.sourceforge.net>
+Date: Sun, 15 May 2016 13:45:33 -0700
+Subject: [PATCH] - Initialized hostlimit variable to default empty string. -
+ Allow the use of /dev/null as logfile.
+
+---
+ scripts/logwatch.pl | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/scripts/logwatch.pl b/scripts/logwatch.pl
+index 6fcb5cb..0f863dc 100755
+--- a/scripts/logwatch.pl
++++ b/scripts/logwatch.pl
+@@ -93,6 +93,7 @@ $Config{'encode'} = "none"; #8.0
+ $Config{'hostformat'} = "none"; #8.0
+ $Config{'html_wrap'} = 80;
+ $Config{'supress_ignores'} = 0;
++$Config{'hostlimit'} = "";
+ 
+ if (-e "$ConfigDir/conf/html/header.html") {
+    $Config{'html_header'} = "$ConfigDir/conf/html/header.html";
+@@ -778,8 +779,8 @@ foreach $LogFile (@LogFileList) {
+    my $FileText = "";
+ 
+    foreach my $ThisFile (@FileList) {
+-      #Existence check for files -mgt
+-      next unless (-f $ThisFile);
++      #Existence check for files and character devices such as /dev/null
++      next unless (-f $ThisFile || -c $ThisFile );
+       if ($ThisFile =~ /'/) {
+          print "File $ThisFile has invalid embedded quotes.  File ignored.\n";
+ 	 next;
+-- 
+2.14.0
+
+From 23e714ad43285d59c5b5852ef2c6013593d64671 Mon Sep 17 00:00:00 2001
+From: bjorn <bjorn1@users.sourceforge.net>
+Date: Sun, 15 May 2016 13:49:08 -0700
+Subject: [PATCH] [journalctl] Added shared script contributed by Mark Grimes.
+
+---
+ scripts/shared/journalctl | 83 +++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 83 insertions(+)
+ create mode 100755 scripts/shared/journalctl
+
+diff --git a/scripts/shared/journalctl b/scripts/shared/journalctl
+new file mode 100755
+index 0000000..1627fd4
+--- /dev/null
++++ b/scripts/shared/journalctl
+@@ -0,0 +1,83 @@
++#!/usr/bin/perl
++#
++# The purpose of this script is to pass the output of the journalctl
++# command to the logwatch parsers.  The corresponding conf/logfile 
++# can be simple.  The following example shows a logfile with two lines:
++# LogFile = /dev/null
++# *JournalCtl = "--output=cat --unit=service_name.service"
++#
++# In the example above, the arguments to the JournalCtl command are
++# passed to the journalctl system command.  It is advised to delimit
++# the arguments in double quotes to preserve mixed case, if
++# applicable.
++
++use strict;
++use warnings;
++
++eval "use Date::Manip";
++my $hasDM = $@ ? 0 : 1;
++
++# logwatch passes arguments as one string delimited by single quotes
++my @args  = split(" ", $ARGV[0]);
++my @range = get_range( $ENV{LOGWATCH_DATE_RANGE} );
++
++my $Debug = $ENV{'LOGWATCH_DEBUG'} || 0;
++
++if ($Debug > 5) {
++   warn join " ", 'journalctl', @args, @range, "\n";
++}
++
++system( 'journalctl', @args, @range );
++
++sub get_range {
++    my $range = lc( shift || 'all' );
++    my @range;
++
++    if ( !$range || $range eq 'all' ) {
++        @range = ();
++    } elsif ( $range eq 'yesterday' ) {
++        push @range, '--since', 'yesterday', '--until', 'today';
++    } elsif ( $range eq 'today' ) {
++        push @range, '--since', 'today', '--until', 'tomorrow';
++    } elsif ($hasDM) {
++
++        # Strip off any period
++        $range =~
++          s/for\s+(?:those|that|this)\s+((year|month|day|hour|minute|second)s?)\s*$//;
++
++        # Look for between x and y
++        my ( $range1, $range2 ) =
++          ( $range =~ /^between\s+(.*)\s+and\s+(.*)\s*$/ );
++
++        # Look for since x
++        if ( $range =~ /^\s*since\s+/ ) {
++            ($range1) = ( $range =~ /\s*since\s+(.*)/ );
++            $range2 = "now";
++        }
++
++        # Now convert to journalctl friendly dates
++        if ( $range1 && $range2 ) {
++
++            # Parse dates
++            my $date1 = ParseDate($range1);
++            my $date2 = ParseDate($range2);
++
++            # Switch if date2 is before date1
++            if ( $date1 && $date2 and Date_Cmp( $date1, $date2 ) > 0 ) {
++                my $switch_date = $date1;
++                $date1 = $date2;
++                $date2 = $switch_date;
++            }
++
++            # If we ask for 1/1 to 1/2, we mean 1/2 inclusive. DM returns
++            # 1/2 00:00:00. So we add 1 day to the end time.
++            $date2 = DateCalc( $date2, '1 day' );
++
++            my $fmt = "%Y-%m-%d %H:%M:%S";
++            push @range, '--since', UnixDate( $date1, $fmt ), '--until',
++              UnixDate( $date2, $fmt );
++        }
++    }
++
++    return @range;
++}
+-- 
+2.14.0
+
+Cherry picked from commit ed6eb62f40cb97f71f3df4d982682de68cdf1037.
+Related: #1504984
+
+diff --git a/scripts/services/syslog-ng b/scripts/services/syslog-ng
+--- a/scripts/services/syslog-ng
++++ b/scripts/services/syslog-ng
+@@ -163,7 +163,8 @@ while (defined($ThisLine = <STDIN>)) {
+          } elsif ($processed[$i] eq "destination") {
+             $Stats_dest{$processed[$i+1]} = 
+                $Stats_dest{$processed[$i+1]} + $processed[$i+2];
+-	      } elsif ($processed[$i] eq "source" || $processed[$i] eq "src.internal") {
++	      } elsif ($processed[$i] eq "source" || $processed[$i] eq "src.internal" ||
++                  $processed[$i] eq "src.journald") {
+             $Stats_source{$processed[$i+1]} = 
+                $Stats_source{$processed[$i+1]} + $processed[$i+2];
+          } elsif ($processed[$i] eq "global") {
+@@ -359,7 +360,7 @@ if (keys %Stats_center || keys %Stats_de
+ 
+    if ($Stats_center{received} && %Stats_source) {
+       $lost_rcvd = 0 - $Stats_center{received};
+-      map { $lost_rcvd = $lost_rcvd + $Stats_source{$_} } keys %Stats_source;
++      map { $lost_rcvd = $lost_rcvd + $Stats_source{$_} unless ($_ =~ /journal/); } keys %Stats_source;
+    }
+    if ($Stats_center{queued} && %Stats_dest) {
+       $lost_dest = $Stats_center{queued};
+

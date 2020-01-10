@@ -1,0 +1,26 @@
+Resolves: #1422797
+
+--- a/scripts/services/sshd	2017-08-28 13:11:02.078000000 +0200
++++ b/scripts/services/sshd	2017-08-28 13:38:22.097000000 +0200
+@@ -290,7 +290,9 @@
+        ($ThisLine =~ /^Failed keyboard-interactive for <invalid username> from/ ) or
+        ($ThisLine =~ /^Keyboard-interactive \(PAM\) userauth failed/ ) or
+        ($ThisLine =~ /^debug1: /) or
+-       ($ThisLine =~ /Nasty PTR record .* is set up for [\da-fA-F.:]+, ignoring/)
++       ($ThisLine =~ /Nasty PTR record .* is set up for [\da-fA-F.:]+, ignoring/) or
++       ($ThisLine =~ /Exiting on signal .*$/) or
++       ($ThisLine =~ /Disconnected from (?:[^ ]*) port .*$/)
+    ) {
+       # Ignore these
+    } elsif ( my ($Method,$User,$Host,$Port) = ($ThisLine =~ /^Accepted (\S+) for (\S+) from ([\d\.:a-f]+) port (\d+)/) ) {
+@@ -379,7 +381,9 @@
+       $RefusedConnections{$1}++;
+    } elsif ( my ($Reason) = ($ThisLine =~ /^Authentication refused: (.*)$/ ) ) {
+       $RefusedAuthentication{$Reason}++;
+-   } elsif ( my ($Host,$Reason) = ($ThisLine =~ /^Received disconnect from ([^ ]*): (.*)$/)) {
++   # Old format: Received disconnect from 192.168.122.1: 11: disconnected by user
++   # New format: Received disconnect from 192.168.122.1 port 43680:11: disconnected by user
++   } elsif ( my ($Host,$Reason) = ($ThisLine =~ /^Received disconnect from ([^ ]*)(?: port \d+)?: ?(.*)$/)) {
+       $DisconnectReceived{$Reason}{$Host}++;
+    } elsif ( my ($Host) = ($ThisLine =~ /^ROOT LOGIN REFUSED FROM ([^ ]*)$/)) {
+       $RootLogin{$Host}++;

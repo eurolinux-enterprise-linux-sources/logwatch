@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.4.0
-Release: 32.20130522svn140%{?dist}
+Release: 34.20130522svn140%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -33,6 +33,11 @@ Patch24: logwatch-sshd-detail.patch
 Patch25: logwatch-puppet.patch
 Patch26: logwatch-blank-files.patch
 Patch27: logwatch-sshd-typos.patch
+Patch28: logwatch-sshd-format.patch
+Patch29: logwatch-base64.patch
+### upstreamed
+Patch30: logwatch-journald.patch
+
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
 Requires: perl(Sys::CPU)
@@ -64,6 +69,9 @@ of the package on many systems.
 %patch25 -p1
 %patch26 -p1
 %patch27 -p1
+%patch28 -p1
+%patch29 -p1
+%patch30 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -163,6 +171,13 @@ echo "# Configuration overrides for specific logfiles/services may be placed her
 %{_mandir}/man*/*
 
 %changelog
+* Mon Nov 27 2017 Jan Synáček <jsynacek@redhat.com> - 7.4.0-34.20130522svn140
+- add support for systemd journal (#1504984)
+
+* Mon Oct  2 2017 Jan Synáček <jsynacek@redhat.com> - 7.4.0-33.20130522svn140
+- SSHD log format is going to change (#1422797)
+- logwatch encode=base64 generates invalid mime block (#1123093)
+
 * Thu May 19 2016 Jan Synáček <jsynacek@redhat.com> - 7.4.0-32.20130522svn140
 - Refix logwatch fails with argument list too long (#1300170)
 - Fix Typos in sshd service script output (#1335493)
@@ -309,7 +324,7 @@ echo "# Configuration overrides for specific logfiles/services may be placed her
 
 * Mon Mar 28 2011 Karel Klíč <kklic@redhat.com> - 7.3.6-69.20110228svn46
 - Added -manpage patch fixing a typo in logwatch(8) (rhbz#664883)
-- Removed `rm -rf %{buildroot}` from %%install section
+- Removed `rm -rf %%{buildroot}` from %%install section
 
 * Mon Mar 28 2011 Karel Klíč <kklic@redhat.com> - 7.3.6-68.20110228svn46
 - Added -named-dnessec patch to handle DNSSEC messages in named (rhbz#666394)
