@@ -1,0 +1,36 @@
+Update dovecot log parsing.
+
+Author: Frank Crawford <frank@crawford.emu.id.au>
+Author: Karel Klic <kklic@redhat.com>
+RH-Bugzilla: #645962
+
+--- logwatch-svn127/scripts/services/dovecot.orig	2012-12-30 17:24:53.000000000 +0100
++++ logwatch-svn127/scripts/services/dovecot	2013-01-09 09:09:45.256236296 +0100
+@@ -150,7 +150,7 @@ while (defined($ThisLine = <STDIN>)) {
+          # We don't care about these
+      } elsif ( $ThisLine =~ /Killed with signal /) {
+          $End++;
+-     } elsif ( $ThisLine =~ /Dovecot (v\d[^ ]* |)starting up( \(core dumps disabled\))?$/) {
++     } elsif ( $ThisLine =~ /Dovecot (v\d[^ ]* |)starting up( \(.*\))?$/) {
+          $Restarts++;
+          $End = 0;
+      } elsif ( ( ($User, $Host) = ( $ThisLine =~ /^pop3-login: Login: (.*?) \[(.*)\]/ ) ) or
+@@ -181,15 +181,15 @@ while (defined($ThisLine = <STDIN>)) {
+       }
+ 
+ # 'lda' for dovecot 2.0, 'deliver' for earlier versions
+-    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag (?:lda|deliver)\((.*)\): msgid=.*: saved mail to (\S+)/ ) ) {
++    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag (?:lda|deliver)\((.*)\): msgid=.*: saved mail to (.*)/ ) ) {
+       $Deliver{$User}{$Mailbox}++;
+ 
+ # For Sieve-based delivery
+-    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag (?:lda\(|deliver\(|lmtp\(\d+, )(.*)\): (?:[^:]+: )?sieve: msgid=.*: stored mail into mailbox '([^']*)'/ ) ) {
++    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag (?:lda|deliver)\((.*)\): sieve: msgid=.*: stored mail into mailbox '(.*)'/ ) ) {
+       $Deliver{$User}{$Mailbox}++;
+ 
+ # LMTP-based delivery
+-    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag lmtp\(\d+, (.*)\): [^:]+: msgid=.*: saved mail to (\S+)/ ) ) {
++    } elsif ( ($User, $Mailbox) = ( $ThisLine =~ /^$dovecottag lmtp\(\d+, (.*)\): [^:]+: msgid=.*: saved mail to (.*)/ ) ) {
+     # dovecot: [ID 583609 mail.info] lmtp(12782, cloyce@headgear.org): jBt1EfjCMk3uMQAAm9eMBA: msgid=<4D32DB1F.3080707@c-dot.co.uk>: saved mail to INBOX
+       $Deliver{$User}{$Mailbox}++;
+ 
