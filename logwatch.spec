@@ -1,7 +1,7 @@
 Summary: A log file analysis program
 Name: logwatch
 Version: 7.4.0
-Release: 34.20130522svn140%{?dist}
+Release: 35.20130522svn140%{?dist}
 License: MIT
 Group: Applications/System
 URL: http://www.logwatch.org/
@@ -37,6 +37,7 @@ Patch28: logwatch-sshd-format.patch
 Patch29: logwatch-base64.patch
 ### upstreamed
 Patch30: logwatch-journald.patch
+Patch31: logwatch-sshd-format-2.patch
 
 Requires: textutils sh-utils grep mailx
 Requires: perl(Date::Manip)
@@ -72,6 +73,7 @@ of the package on many systems.
 %patch28 -p1
 %patch29 -p1
 %patch30 -p1
+%patch31 -p1
 rm -f scripts/services/*.orig
 
 %build
@@ -171,6 +173,9 @@ echo "# Configuration overrides for specific logfiles/services may be placed her
 %{_mandir}/man*/*
 
 %changelog
+* Tue Jun 19 2018 Jan Synáček <jsynacek@redhat.com> - 7.4.0-35.20130522svn140
+- unmatched entries after ssh changed log format (#1504979)
+
 * Mon Nov 27 2017 Jan Synáček <jsynacek@redhat.com> - 7.4.0-34.20130522svn140
 - add support for systemd journal (#1504984)
 
